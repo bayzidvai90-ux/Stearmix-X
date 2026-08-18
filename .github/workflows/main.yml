@@ -1,10 +1,10 @@
 name: Build Streamix BD APK
 
-on:
-workflow_dispatch:
+"on":
 push:
 branches:
 - main
+workflow_dispatch:
 
 jobs:
 build:
@@ -18,7 +18,7 @@ steps:
     uses: actions/setup-java@v4
     with:
       distribution: temurin
-      java-version: '17'
+      java-version: "17"
 
   - name: Setup Android SDK
     uses: android-actions/setup-android@v3
@@ -30,29 +30,33 @@ steps:
   - name: Find ZIP
     id: find_zip
     run: |
-      ZIP_FILE=$(find . -maxdepth 2 -type f -iname "*.zip" | head -n 1)
+      ZIP_FILE=$(find . -maxdepth 3 -type f -iname "*.zip" | head -n 1)
+
       if [ -z "$ZIP_FILE" ]; then
         echo "ERROR: No ZIP file found."
         exit 1
       fi
+
       echo "ZIP_FILE=$ZIP_FILE" >> "$GITHUB_ENV"
-      echo "Found: $ZIP_FILE"
+      echo "Found ZIP: $ZIP_FILE"
 
   - name: Extract Android Project
     run: |
       rm -rf android-project
-      mkdir android-project
+      mkdir -p android-project
       unzip -q "$ZIP_FILE" -d android-project
 
   - name: Locate Gradle Project
     run: |
-      PROJECT_DIR=$(find android-project -type f -name "settings.gradle*" -o -name "build.gradle*" | head -n 1 | xargs -r dirname)
+      SETTINGS_FILE=$(find android-project -type f -name "settings.gradle" -o -name "settings.gradle.kts" | head -n 1)
 
-      if [ -z "$PROJECT_DIR" ] || [ ! -d "$PROJECT_DIR" ]; then
-        echo "ERROR: Android Gradle project not found."
-        find android-project -maxdepth 4 -type f | head -100
+      if [ -z "$SETTINGS_FILE" ]; then
+        echo "ERROR: settings.gradle or settings.gradle.kts not found."
+        find android-project -maxdepth 5 -type f | head -100
         exit 1
       fi
+
+      PROJECT_DIR=$(dirname "$SETTINGS_FILE")
 
       echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
       echo "Gradle project: $PROJECT_DIR"
@@ -60,12 +64,12 @@ steps:
   - name: Make Gradle Wrapper Executable
     working-directory: ${{ env.PROJECT_DIR }}
     run: |
-      if [ -f "./gradlew" ]; then
-        chmod +x ./gradlew
-      else
+      if [ ! -f "./gradlew" ]; then
         echo "ERROR: gradlew not found."
         exit 1
       fi
+
+      chmod +x ./gradlew
 
   - name: Build Debug APK
     working-directory: ${{ env.PROJECT_DIR }}
@@ -75,7 +79,7 @@ steps:
   - name: Find APK
     id: apk
     run: |
-      APK=$(find "${PROJECT_DIR}" -type f -name "*.apk" | head -n 1)
+      APK=$(find "$PROJECT_DIR" -type f -name "*.apk" | head -n 1)
 
       if [ -z "$APK" ]; then
         echo "ERROR: APK not found."
