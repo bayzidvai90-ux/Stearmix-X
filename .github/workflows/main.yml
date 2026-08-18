@@ -61,14 +61,14 @@ jobs:
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           echo "Gradle project: $PROJECT_DIR"
 
+      - name: Fix Gradle Wrapper
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          gradle wrapper
+
       - name: Make Gradle Wrapper Executable
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
-          if [ ! -f "./gradlew" ]; then
-            echo "ERROR: gradlew not found."
-            exit 1
-          fi
-
           chmod +x ./gradlew
 
       - name: Build APK with Gradle
