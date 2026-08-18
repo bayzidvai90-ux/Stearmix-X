@@ -104,7 +104,7 @@ jobs:
 
       - name: Build APK with Gradle
         working-directory: ${{ env.PROJECT_DIR }}
-        run: ./gradlew assembleDebug --no-daemon -Pandroid.experimental.art-ti-version=17 -Dorg.gradle.jvmargs="-Xmx2048m"
+        run: ./gradlew assembleDebug --no-daemon -Pkotlin.suppressKotlinVersionCompatibilityCheck=true -Pandroid.experimental.art-ti-version=17 -Dorg.gradle.jvmargs="-Xmx2048m"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
