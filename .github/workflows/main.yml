@@ -59,6 +59,15 @@ jobs:
         run: |
           gradle wrapper
 
+      - name: Patch Compose Compiler Incompatibility
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: |
+          # Apply root resolution strategy for Kotlin Compose Compiler plugin
+          BUILD_FILE=$(find . -maxdepth 2 -name "build.gradle" -o -name "build.gradle.kts" | head -n 1)
+          if [ -f "build.gradle" ]; then
+            echo 'allprojects { configurations.all { resolutionStrategy.force "androidx.compose.compiler:compiler:1.5.8" } }' >> build.gradle
+          fi
+
       - name: Create Missing Files (Keystore & Correct Google Services)
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
@@ -107,8 +116,6 @@ jobs:
         run: |
           ./gradlew assembleDebug --no-daemon \
             -Pkotlin.suppressKotlinVersionCompatibilityCheck=true \
-            -Pandroid.experimental.art-ti-version=17 \
-            -Pkotlin.compiler.execution.strategy=in-process \
             -Dorg.gradle.jvmargs="-Xmx2048m"
 
       - name: Upload APK
