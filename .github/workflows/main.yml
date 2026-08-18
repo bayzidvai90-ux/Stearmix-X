@@ -66,17 +66,45 @@ jobs:
         run: |
           gradle wrapper
 
-      - name: Create Missing Files (Keystore & Google Services)
+      - name: Create Missing Files (Keystore & Correct Google Services)
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
           # Debug Keystore তৈরি
           keytool -genkey -v -keystore debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
           
-          # Dummy google-services.json তৈরি (যাতে Firebase এরর না দেয়)
+          # সঠিক Package Name দিয়ে google-services.json তৈরি
           mkdir -p app
-          if [ ! -f "app/google-services.json" ]; then
-            echo '{"project_info":{"project_number":"123456789","project_id":"dummy-app","storage_bucket":"dummy.appspot.com"},"client":[{"client_info":{"mobilesdk_app_id":"1:123456789:android:123456789","android_client_info":{"package_name":"com.example.app"}},"oauth_client":[],"api_key":[{"current_key":"dummy_key"}]}]}' > app/google-services.json
-          fi
+          cat << 'EOF' > app/google-services.json
+          {
+            "project_info": {
+              "project_number": "123456789000",
+              "project_id": "streamix-bd",
+              "storage_bucket": "streamix-bd.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:123456789000:android:1234567890abcdef",
+                  "android_client_info": {
+                    "package_name": "com.aistudio.streamixbd.vplay"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [
+                  {
+                    "current_key": "AIzaSyDummyKeyForBuildPurposeOnly12345"
+                  }
+                ],
+                "services": {
+                  "appinvite_service": {
+                    "other_platform_oauth_client": []
+                  }
+                }
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
 
       - name: Make Gradle Wrapper Executable
         working-directory: ${{ env.PROJECT_DIR }}
