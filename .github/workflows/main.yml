@@ -20,6 +20,11 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Clean Gradle Caches
+        run: |
+          rm -rf ~/.gradle/caches/
+          rm -rf ~/.gradle/daemon/
+
       - name: Find ZIP
         id: find_zip
         run: |
@@ -106,6 +111,7 @@ jobs:
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
           ./gradlew assembleDebug --no-daemon \
+            --refresh-dependencies \
             -Pkotlin.suppressKotlinVersionCompatibilityCheck=true \
             -Dorg.gradle.jvmargs="-Xmx2048m"
 
