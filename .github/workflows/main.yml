@@ -70,3 +70,13 @@ jobs:
           fi
 
           chmod +x ./gradlew
+
+      - name: Build APK with Gradle
+        working-directory: ${{ env.PROJECT_DIR }}
+        run: ./gradlew assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Streamix-BD-APK
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
