@@ -20,11 +20,6 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Clean Gradle Caches
-        run: |
-          rm -rf ~/.gradle/caches/
-          rm -rf ~/.gradle/daemon/
-
       - name: Find ZIP
         id: find_zip
         run: |
@@ -59,7 +54,7 @@ jobs:
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           echo "Gradle project: $PROJECT_DIR"
 
-      - name: Force Compatible Gradle Version (8.2)
+      - name: Force Compatible Gradle Version
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
           gradle wrapper --gradle-version 8.2 --distribution-type bin
@@ -107,13 +102,14 @@ jobs:
         run: |
           chmod +x ./gradlew
 
-      - name: Build APK with Gradle
+      - name: Build APK with Clean Cache Path
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
-          ./gradlew assembleDebug --no-daemon \
-            --refresh-dependencies \
+          ./gradlew assembleDebug \
+            --no-daemon \
+            --g-user-home "$HOME/.gradle_clean" \
             -Pkotlin.suppressKotlinVersionCompatibilityCheck=true \
-            -Dorg.gradle.jvmargs="-Xmx2048m"
+            -Dorg.gradle.jvmargs="-Xmx3072m -XX:MaxMetaspaceSize=512m"
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
