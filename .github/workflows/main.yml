@@ -54,19 +54,10 @@ jobs:
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
           echo "Gradle project: $PROJECT_DIR"
 
-      - name: Fix Gradle Wrapper
+      - name: Force Compatible Gradle Version (8.2)
         working-directory: ${{ env.PROJECT_DIR }}
         run: |
-          gradle wrapper
-
-      - name: Patch Compose Compiler Incompatibility
-        working-directory: ${{ env.PROJECT_DIR }}
-        run: |
-          # Apply root resolution strategy for Kotlin Compose Compiler plugin
-          BUILD_FILE=$(find . -maxdepth 2 -name "build.gradle" -o -name "build.gradle.kts" | head -n 1)
-          if [ -f "build.gradle" ]; then
-            echo 'allprojects { configurations.all { resolutionStrategy.force "androidx.compose.compiler:compiler:1.5.8" } }' >> build.gradle
-          fi
+          gradle wrapper --gradle-version 8.2 --distribution-type bin
 
       - name: Create Missing Files (Keystore & Correct Google Services)
         working-directory: ${{ env.PROJECT_DIR }}
